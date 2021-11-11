@@ -1,0 +1,17 @@
+
+{% block header %}
+  <h1>{% block title %}Status of your create request:{% endblock %}</h1>
+{% endblock %}
+
+
+{% block content %}
+  <form method="post">
+      <ul>
+          <li> Status :{{data['status']}}</li>
+          <li> ID :{{data['transactionId']}}</li>
+          <li> Error :{{data['error']}}</li>
+          <li> Execute :{{data['executeUrl']}}</li>
+
+        </ul>
+  </form>
+{% endblock %}
