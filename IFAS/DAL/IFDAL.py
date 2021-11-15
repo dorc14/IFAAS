@@ -1,31 +1,27 @@
-import json
+from db import db_connection
+from sqlalchemy import text
 
-ifDict = {}
 def getIf(id):
-    for key,value in ifDict.items():
-        if(key == id):
-            return value
+    db = db_connection()
+    wantedIf = db.execute(text("SELECT * FROM ifs WHERE id = :id"),{"id": str(id)}).mappings().all()
+    return wantedIf
+
 def getAllIfs():
-    values = list(ifDict.values())
-    return values
+    db = db_connection()
+    ifs = db.execute(text("SELECT * FROM ifs")).mappings().all()
+    return ifs
 
 def createIf(id,name,properties,executeUrl):
-    body = {
-        "id" : id,
-        "name": name,
-        "properties": properties,
-        "url" : {
-            "if-execute": executeUrl
-        }
-    }
-    jsonStr = json.dumps(body)
-    insertIf = json.loads(jsonStr)
-    ifDict[id] = insertIf
-
-def getNameById(id):
-    return ifDict.get(id)["name"]
+    db = db_connection()
+    db.execute(text("INSERT INTO ifs VALUES (:id,:name,:properties,:executeUrl)"),
+               {"id": id, "name": name, "properties": properties, "executeUrl": executeUrl})
 
 def getIdByName(name):
-    for key,value in ifDict.items():
-        if (value["name"] == name):
-            return key
+    db = db_connection()
+    ifId = db.execute(text("select id from ifs where name = :name"),{"name": str(name)}).mappings().all()
+    return ifId[0]
+
+def checkIfExist(name):
+    db = db_connection()
+    wantedIf = db.execute(text("select * from ifs where name = :name"),{"name": str(name)}).mappings().all()
+    return bool(wantedIf)

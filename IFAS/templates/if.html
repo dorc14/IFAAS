@@ -11,8 +11,8 @@
 {% for item in data %}
           <li> ID :{{item['id']}}</li>
           <li>NAME :{{item['name']}}</li>
-          <li>CONDITION : {{item['properties']}}</li>
-          <li>URL : {{item['url']['if-execute']}}</li>
+          <li>CONDITION : {{item['condition']}}</li>
+          <li>URL : {{item['if_execute']}}</li>
 {% endfor %}
         </ul>
   </form>

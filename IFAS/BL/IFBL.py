@@ -4,16 +4,16 @@ import requests
 import json
 import validators
 from tasks import getTrans
+import re
+
 
 def getIf(id):
-    iflist = []
     wantedIf = IFDAL.getIf(id)
-    iflist.append(wantedIf)
-    return iflist
+    return wantedIf
 
 def getAllIfs():
     allIfs = IFDAL.getAllIfs()
-    return makeJsonBody(allIfs)
+    return allIfs
 
 def createIf(name,properties, url = None):
     body = {
@@ -24,33 +24,42 @@ def createIf(name,properties, url = None):
         "url" : url
     }
     requestBody = makeJsonBody(body)
+    match = re.search('^[a-z]*[-]+[a-z]+$',name)
 
-    transid = requests.post("https://ifaas-heroku.herokuapp.com/if",json= requestBody).json()["transactionId"]
-    result = getTrans.delay(transid)
-    transaction = result.get()
-    if transaction['status'] == 'SUCCEEDED':
-        id = str(transaction["boxId"])
-        executeUrl = "https://127.0.0.1:5000/if/" + name + "/execute"
-        IFDAL.createIf(id,name,properties,executeUrl)
-        transaction['executeUrl'] = executeUrl
-        webhookBody = {
-            "name": name,
-            "url": executeUrl
-        }
-        urlBody = makeJsonBody(webhookBody)
+    if not IFDAL.checkIfExist(name) and match:
+        transid = requests.post("https://ifaas-heroku.herokuapp.com/if",json= requestBody).json()["transactionId"]
+        result = getTrans.delay(transid)
+        transaction = result.get()
+        if transaction['status'] == 'SUCCEEDED':
+            id = str(transaction["boxId"])
+            executeUrl = "https://127.0.0.1:5000/if/" + name + "/execute"
+            IFDAL.createIf(id,name,properties,executeUrl)
+            transaction['executeUrl'] = executeUrl
+            webhookBody = {
+                "name": name,
+                "url": executeUrl
+            }
+            urlBody = makeJsonBody(webhookBody)
 
-        ''''requests.post(url, json=urlBody)'''''
+        else:
+            print("There was an error creating the if" + transaction["error"])
+            webhookBody = {
+                "error": transaction["error"]
+            }
+            urlBody = makeJsonBody(webhookBody)
+        if(validators.url(url)):
+            requests.post(url, json=urlBody)
+        else:
+            print("Wrong Url pls Change")
     else:
-        print("There was an error creating the if" + transaction["error"])
-        error = {
-            "error": transaction["error"]
+        transaction = {
+            "error": "There was an error Creating the if, check the name"
         }
-        errBody = makeJsonBody(error)
-        ''''requests.post(url, json=errBody)'''''
+
     return transaction
 
 def execIf(name,param):
-    id = IFDAL.getIdByName(name)
+    id = IFDAL.getIdByName(name)["id"]
     jsonBody = makeJsonBody(param)
 
     ifResult = requests.post("https://ifaas-heroku.herokuapp.com/if/" + id + "/execute",json= jsonBody).json()
