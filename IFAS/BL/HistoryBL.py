@@ -1,12 +1,9 @@
 from DAL import HistoryDAL
 from datetime import date
 
+
 def addIf(param,result):
-    addedIf = {
-        "date" : date.today(),
-        "parameter" : param,
-        "result" : result
-    }
-    HistoryDAL.addIf(addedIf)
+    HistoryDAL.addIf(date.today(),param,result)
+
 def getHistory():
     return HistoryDAL.getAllHistory()
