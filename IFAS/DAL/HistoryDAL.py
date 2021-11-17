@@ -1,12 +1,14 @@
 from db import db_connection
 from sqlalchemy import text
 
-def getAllHistory():
-    db = db_connection()
-    history = db.execute(text("SELECT * FROM history")).mappings().all()
-    return history
+class historyData:
+    def __init__(self):
+        self.db = db_connection()
 
-def addIf(date,params,result):
-    db = db_connection()
-    db.execute(text("INSERT INTO ifs VALUES (:date,:params,:result)"),
-               {"date": date, "params": params, "result": result})
+    def getAllHistory(self) -> list:
+        ifStats = self.db.execute(text("SELECT * FROM history")).mappings().all()
+        return ifStats
+
+    def addIf(self, date, params: str, result: str):
+        self.db.execute(text("INSERT INTO history VALUES (:date,:params,:result)"),
+               {"date": date, "params": str(params), "result": result})
