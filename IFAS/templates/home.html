@@ -1,0 +1,24 @@
+
+{% block header %}
+  <h1>{% block title %}Welcome to the IfAAS{% endblock %}</h1>
+  <h1>{% block subtitle %}IF LIST{% endblock %}</h1>
+{% endblock %}
+
+
+{% block content %}
+    <ul>
+{% for item in data %}
+      <li> <a href="{{url_for('getif',id=item.id)}}"> <button>{{item.name}}</button></a></li>
+{% endfor %}
+</ul>
+{% endblock %}
+
+{% block end %}
+<h1>Create If</h1>
+  <form action = {{url_for('if')}} method = "POST">
+    <p>Name: <input type = "text" name = "name" /></p>
+    <p>condition: <input type = "text" name = "condition" /></p>
+    <p>url: <input type = "text" name = "url" /></p>
+    <p><input type = "submit" value = "submit" /> </p>
+  </form>
+{% endblock %}
